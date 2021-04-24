@@ -1,0 +1,18 @@
+{
+    "extends": [
+        "tslint:recommended",
+        "tslint-react",
+        "tslint-config-prettier"
+    ],
+    "rules": {
+        "ordered-imports": false,
+        "object-literal-sort-keys": false,
+        "no-console": false,
+        "jsx-no-lamda": false,
+        "member-ordering": false,
+        "no-use-before-define": "off",
+        "@typescript-eslint/no-use-before-define": [
+            "error"
+        ]
+    }
+}
