@@ -1,4 +1,4 @@
-import { useContext, useRef, useState } from "react";
+import React, { useContext, useRef, useState } from "react";
 import { Button } from "primereact/button";
 import { Divider } from "primereact/divider";
 import { InputText } from "primereact/inputtext";
@@ -7,8 +7,11 @@ import { Toast } from "primereact/toast";
 import "./Auth.scss";
 import { useAuth } from "shared/components/Firebase/auth";
 import Loader from "shared/Loader/Loader";
-import { AppContext } from "shared/context/app.context";
+import { AppContext, IAppContext } from "shared/context/app.context";
 import { Constants } from "shared/constants";
+import { Checkbox } from "primereact/checkbox";
+import { isValidEmail } from "shared/helpers/Helpers";
+import { useHistory } from "react-router-dom";
 
 const Auth = () => {
   const [emailVal, setEmail] = useState("");
@@ -18,9 +21,11 @@ const Auth = () => {
   const [username, setUsername] = useState("");
   const [passwordType, setPasswordType] = useState("password");
   const [regPasswordType, setRegPasswordType] = useState("password");
-  const [, dispatch] = useContext(AppContext);
+  const [state, dispatch] = useContext(AppContext);
+  const { isTeacher } = state as IAppContext;
   const toast = useRef(null as any);
   const auth = useAuth();
+  const history = useHistory();
 
   const showToast = (severity: string, summary: string, detail: string) => {
     toast.current.show({ severity, summary, detail, life: 5000 });
@@ -33,9 +38,12 @@ const Auth = () => {
     });
   };
 
-  const isValidEmail = (email: string) => {
-    var reg = /^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/i;
-    return reg.test(email);
+  const routeCallback = () => {
+    if (isTeacher) {
+      history.push(`teacher/${auth.user.uid}`);
+    } else {
+      history.push(`student/${auth.user.uid}`);
+    }
   };
 
   return (
@@ -79,11 +87,14 @@ const Auth = () => {
             </span>
             <Button
               onClick={() => {
+                showLoader(true);
                 auth
                   .signIn(emailVal, passwordVal)
                   .then(() => {
+                    showLoader(false);
                     showToast("success", "Success", "Sign in successful");
                   })
+                  .then(() => routeCallback())
                   .catch((err: { code: any; message: string }) => {
                     showLoader(false);
                     if (
@@ -164,21 +175,43 @@ const Auth = () => {
               disabled={!isValidEmail(regEmail) || !regPassword || !username}
               label="Register"
               onClick={() => {
+                showLoader(true);
                 auth
-                  .registerUser(regEmail, regPassword, username)
-                  .then(() =>
+                  .registerUser(regEmail, regPassword, username, isTeacher)
+                  .then(() => {
+                    showLoader(false);
                     showToast(
                       "success",
                       "Success",
                       "Account successfully registered"
-                    )
-                  )
+                    );
+                  })
+                  .then(() => {
+                    routeCallback();
+                  })
                   .catch((err: { message: string }) => {
+                    showLoader(false);
                     showToast("error", "Error", err.message);
                   });
               }}
             />
           </div>
+        </div>
+        <Divider />
+        <div className="p-col-12">
+          <Checkbox
+            inputId="cb1"
+            onChange={(e) => {
+              dispatch({
+                type: Constants.IS_TEACHER,
+                payload: e.checked,
+              });
+            }}
+            checked={isTeacher}
+          ></Checkbox>
+          <label htmlFor="cb1" className="p-checkbox-label">
+            &nbsp; I am a teacher
+          </label>
         </div>
       </Card>
     </div>

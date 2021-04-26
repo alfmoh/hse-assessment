@@ -5,6 +5,7 @@ export interface IAppContext {
   showToaster: any;
   loaderText: string;
   showLoader: boolean;
+  isTeacher: boolean;
 }
 
 const defaultVal: any = null;
@@ -14,6 +15,7 @@ const initialState: IAppContext = {
   showToaster: null,
   loaderText: loadingText,
   showLoader: false,
+  isTeacher: false,
 };
 
 const reducer = (state: IAppContext, action: any): IAppContext => {
@@ -23,6 +25,11 @@ const reducer = (state: IAppContext, action: any): IAppContext => {
         ...state,
         showLoader: action.payload,
         loaderText: loadingText,
+      };
+    case Constants.IS_TEACHER:
+      return {
+        ...state,
+        isTeacher: action.payload,
       };
 
     default:

@@ -35,7 +35,8 @@ export const useProvideAuth = () => {
   const registerUser = async (
     email: string,
     password: string,
-    username: string
+    username: string,
+    isTeacher = false
   ) => {
     try {
       const response = await createUser(email, password);
@@ -50,7 +51,7 @@ export const useProvideAuth = () => {
             return user;
           })
           .then(async () => {
-            const formattedUser = formatUser(user);
+            const formattedUser = formatUser(user, isTeacher);
             try {
               await createDbUser(formattedUser);
               return formattedUser;
@@ -114,13 +115,15 @@ export const useProvideAuth = () => {
       }
     });
     return () => sub$();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const formatUser = (user: firebase.User): AppUser => {
+  const formatUser = (user: firebase.User, isTeacher = false): AppUser => {
     return {
       uid: user.uid,
       email: user.email as string,
       displayName: user.displayName as string,
+      isTeacher,
     };
   };
 

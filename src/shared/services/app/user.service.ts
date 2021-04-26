@@ -13,10 +13,10 @@ const updateDbUser = (user: AppUser) => {
 };
 
 const createDbUser = (user: AppUser) => {
-  user.templates = [];
+  if (user.isTeacher) user.studentWorks = [];
+  else user.assigments = [];
   return createDb(USER_DOC_PATH, user.uid, user);
 };
-
 
 const getUsers = (userId: string | string[]) => {
   return getDocs(USER_DOC_PATH, userId);
@@ -26,9 +26,4 @@ const updateUserField = (user: AppUser, data: any) => {
   return updateDocField(USER_DOC_PATH, user.uid, data);
 };
 
-export {
-  updateDbUser,
-  createDbUser,
-  getUsers,
-  updateUserField
-};
+export { updateDbUser, createDbUser, getUsers, updateUserField };

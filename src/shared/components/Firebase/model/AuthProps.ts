@@ -6,7 +6,8 @@ export interface IAuthProps {
   registerUser: (
     email: string,
     password: string,
-    username: string
+    username: string,
+    isTeacher: boolean
   ) => Promise<AppUser | null>;
   getDbUser: (userId: string) => Promise<void>;
   getToken: () => Promise<string>;
@@ -17,5 +18,7 @@ export interface AppUser {
   uid: string;
   email: string;
   displayName: string;
-  templates?: string[];
+  assigments?: any[];
+  studentWorks?: any[];
+  isTeacher: boolean;
 }
