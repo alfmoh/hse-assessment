@@ -39,10 +39,12 @@ const Auth = () => {
   };
 
   const routeCallback = () => {
-    if (isTeacher) {
-      history.push(`teacher/${auth.user.uid}`);
-    } else {
-      history.push(`student/${auth.user.uid}`);
+    if(auth.user) {
+      if (isTeacher) {
+        history.push(`teacher/${auth.user.uid}`);
+      } else {
+        history.push(`student/${auth.user.uid}`);
+      }
     }
   };
 

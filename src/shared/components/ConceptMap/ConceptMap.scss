@@ -1,0 +1,24 @@
+.cm {
+    &__new-btn {
+        float: right;
+    }
+
+    &__save-btn {
+        float: right;
+    }
+
+    &-edge {
+        display: flex;
+        flex-direction: column;
+
+        &-node-select {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        &__label {
+            align-self: center;
+        }
+    }
+}

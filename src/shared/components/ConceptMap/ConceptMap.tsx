@@ -1,18 +1,51 @@
-import React, { useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { Graph } from "react-d3-graph";
 import "./ConceptMap.scss";
 import { Sidebar } from "primereact/sidebar";
+import { Button } from "primereact/button";
+import { RadioButton } from "primereact/radiobutton";
+import { InputText } from "primereact/inputtext";
+import { Dropdown } from "primereact/dropdown";
+import { updateUserField, getUsers } from "shared/services/app/user.service";
+import { useParams } from "react-router-dom";
+import { Constants } from "shared/constants";
+import { AppContext } from "shared/context/app.context";
+import { useAuth } from "../Firebase/auth";
 
 const ConceptMap = () => {
+  // const initialData = {
+  //   nodes: [{ id: 1 }, { id: 2 }, { id: 3 }],
+  //   links: [
+  //     { source: 1, target: 2, label: "Hello" },
+  //     { source: 2, target: 3 },
+  //   ],
+  // };
+  const initialData = {
+    nodes: [] as any,
+    links: [] as any,
+  };
+  const NODE = "Node";
+  const EDGE = "Edge";
   const [visibleSidebar, setVisibleSidebar] = useState(false);
   const [clickedItem, setClickedItem] = useState(null as any);
-  const [data, setData] = useState({
-    nodes: [{ id: 1 }, { id: 2 }, { id: 3 }],
-    links: [
-      { source: 1, target: 2 },
-      { source: 2, target: 3 },
-    ],
-  });
+  const [mapData, setMapData] = useState(initialData);
+  const [selectedItem, setSelectedItem] = useState(NODE);
+  const [nodeName, setNodeName] = useState("");
+  const [fromNode, setFromNode] = useState("");
+  const [toNode, setToNode] = useState("");
+  const [edgeLabel, setEdgeLabel] = useState("");
+  const [state, dispatch] = useContext(AppContext);
+  
+  let { id } = useParams() as any;
+  const auth = useAuth();
+
+  const citySelectItems = [
+    { label: "New York", value: "New York" },
+    { label: "Rome", value: "RM" },
+    { label: "London", value: "London" },
+    { label: "Istanbul", value: "IST" },
+    { label: "Paris", value: "PRS" },
+  ];
 
   const config = {
     nodeHighlightBehavior: true,
@@ -23,15 +56,152 @@ const ConceptMap = () => {
     },
     link: {
       highlightColor: "lightblue",
+      renderLabel: true,
     },
-    staticGraphWithDragAndDrop: true,
+    // staticGraphWithDragAndDrop: true,
     directed: true,
+  };
+
+  useEffect(() => {
+    // console.clear();
+    if (auth.user && auth.user.uid) {
+      getUsers(auth.user.uid).then((result) => {
+        const { data } = result[0];
+        console.log(data);
+        setMapData({ nodes: data.nodes, links: data.links });
+      });
+    }
+  }, [auth.user]);
+
+  const showLoader = (show: boolean) => {
+    dispatch({
+      type: Constants.SHOW_LOADER,
+      payload: show,
+    });
   };
 
   const sidebarData = () => {
     if (clickedItem) {
       const { data } = clickedItem;
-      if (clickedItem.isNode) {
+      if (clickedItem.isNew) {
+        return (
+          <div>
+            <h3>Select item to create:</h3>
+            <div className="p-field-radiobutton">
+              <RadioButton
+                inputId="item1"
+                name="item"
+                value={NODE}
+                onChange={(e) => setSelectedItem(e.value)}
+                checked={selectedItem === NODE}
+              />
+              <label htmlFor="item1">&nbsp;{NODE}</label>
+            </div>
+            <br />
+            <div className="p-field-radiobutton">
+              <RadioButton
+                inputId="item2"
+                name="item"
+                value={EDGE}
+                onChange={(e) => setSelectedItem(e.value)}
+                checked={selectedItem === EDGE}
+              />
+              <label htmlFor="item2">&nbsp;{EDGE}</label>
+            </div>
+            <br />
+            {selectedItem === NODE ? (
+              <span className="p-float-label">
+                <InputText
+                  id="nodename"
+                  value={nodeName}
+                  onChange={(e) => setNodeName(e.target.value)}
+                />
+                <label htmlFor="nodename">Node name</label>
+              </span>
+            ) : (
+              <div className="cm-edge">
+                <div className="cm-edge-node-select">
+                  <Dropdown
+                    value={fromNode}
+                    options={
+                      mapData.nodes.length ? mapData.nodes.map((x) => x.id) : []
+                    }
+                    onChange={(e) => setFromNode(e.value)}
+                    placeholder="Select start node"
+                  />
+                  <i className="pi pi-arrow-right"></i>
+                  <Dropdown
+                    value={toNode}
+                    options={
+                      mapData.nodes.length ? mapData.nodes.map((x) => x.id) : []
+                    }
+                    onChange={(e) => setToNode(e.value)}
+                    placeholder="Select end node"
+                  />
+                </div>
+                <br />
+                <span className="p-float-label cm-edge__label">
+                  <InputText
+                    id="edgeLabel"
+                    value={edgeLabel}
+                    onChange={(e) => setEdgeLabel(e.target.value)}
+                  />
+                  <label htmlFor="edgeLabel">Edge label</label>
+                </span>
+              </div>
+            )}
+            <br />
+            <Button
+              label={`Save ${selectedItem}`}
+              className="p-button-success cm__save-btn"
+              onClick={() => {
+                let dataUpdate = null as any;
+                if (selectedItem === NODE) {
+                  if (nodeName && nodeName.trim()) {
+                    const nodes = [
+                      ...mapData.nodes,
+                      { id: nodeName, x: getRandomInt() },
+                    ];
+                    dataUpdate = {
+                      ...mapData,
+                      nodes,
+                    };
+                    console.log(dataUpdate);
+                    // updateUserField(id, newData);
+                  }
+                } else if (selectedItem === EDGE) {
+                  if (
+                    fromNode &&
+                    fromNode.trim() &&
+                    toNode &&
+                    toNode.trim() &&
+                    edgeLabel &&
+                    edgeLabel.trim()
+                  ) {
+                    const newEdge = {
+                      source: fromNode,
+                      target: toNode,
+                      label: edgeLabel,
+                    };
+                    const links = [...mapData.links, newEdge];
+                    dataUpdate = {
+                      ...mapData,
+                      links,
+                    };
+                  }
+                }
+                if (dataUpdate) {
+                  showLoader(true);
+                  console.log(dataUpdate);
+                  updateUserField(id, dataUpdate).then(() => {
+                    showLoader(false);
+                  });
+                }
+              }}
+            />
+          </div>
+        );
+      } else if (clickedItem.isNode) {
         return <div>{data.nodeId}</div>;
       } else {
         return (
@@ -44,17 +214,28 @@ const ConceptMap = () => {
   };
 
   return (
-    <div>
+    <div className="cm">
+      <Button
+        onClick={() => {
+          setVisibleSidebar(true);
+          setClickedItem({ isNew: true, data: {} });
+        }}
+        className="cm__new-btn"
+        label="New item"
+      />
       <Sidebar
+        style={{ width: "30em" }}
         position="right"
         visible={visibleSidebar}
-        onHide={() => setVisibleSidebar(false)}
+        onHide={() => {
+          setVisibleSidebar(false);
+        }}
       >
         {sidebarData()}
       </Sidebar>
       <Graph
-        id="graph-id" // id is mandatory
-        data={data}
+        id="graph-id"
+        data={mapData}
         config={config}
         onClickNode={(nodeId: any) => {
           setVisibleSidebar(true);
@@ -66,10 +247,10 @@ const ConceptMap = () => {
           });
           const node = [{ id: 4 }];
           const link = [{ source: 3, target: 4 }];
-          setData({
-            ...data,
-            nodes: [...data.nodes, ...node],
-            links: [...data.links, ...link],
+          setMapData({
+            ...mapData,
+            nodes: [...mapData.nodes, ...node],
+            links: [...mapData.links, ...link],
           });
           // data.nodes.push({ id: 4 });
           // data.links.push({ source: 1, target: 4 });
@@ -83,11 +264,14 @@ const ConceptMap = () => {
             },
           });
           setVisibleSidebar(true);
-          console.log({ source, target });
         }}
       />
     </div>
   );
 };
+
+function getRandomInt() {
+  return Math.random() * (100 - 30) + 30;
+}
 
 export default ConceptMap;

@@ -6,6 +6,7 @@ import { Button } from "primereact/button";
 import { Divider } from "primereact/divider";
 import { useHistory } from "react-router-dom";
 import ConceptMap from "shared/components/ConceptMap/ConceptMap";
+import { createAssignment } from "shared/services/app/user.service";
 
 const CreateAssignment = () => {
   const history = useHistory();
@@ -25,6 +26,13 @@ const CreateAssignment = () => {
         theme="snow"
         value={assignmentText}
         onChange={setAssignmentText}
+      />
+      <Button
+        style={{float: 'right', margin: 20}}
+        label="Save"
+        onClick={() => {
+          createAssignment({assignmentText});
+        }}
       />
       <Divider />
       <details>

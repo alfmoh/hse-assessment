@@ -46,6 +46,11 @@ const updateDocField = (collectionPath: string, docId: string, data: any) => {
   return firestore.collection(collectionPath).doc(docId).update(data);
 };
 
+const getAllDocs = async (collectionPath) => {
+  const snapshot = await firebase.firestore().collection(collectionPath).get()
+    return snapshot.docs.map(doc => doc.data());
+}
+
 export {
   updateDb,
   createDb,
@@ -53,4 +58,5 @@ export {
   getDocs,
   deleteDocument,
   updateDocField,
+  getAllDocs
 };
