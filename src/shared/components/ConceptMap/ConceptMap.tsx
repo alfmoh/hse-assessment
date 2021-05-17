@@ -9,43 +9,23 @@ import { Dropdown } from "primereact/dropdown";
 import { updateUserField, getUsers } from "shared/services/app/user.service";
 import { useParams } from "react-router-dom";
 import { Constants } from "shared/constants";
-import { AppContext } from "shared/context/app.context";
+import { AppContext, IAppContext } from "shared/context/app.context";
 import { useAuth } from "../Firebase/auth";
 
 const ConceptMap = () => {
-  // const initialData = {
-  //   nodes: [{ id: 1 }, { id: 2 }, { id: 3 }],
-  //   links: [
-  //     { source: 1, target: 2, label: "Hello" },
-  //     { source: 2, target: 3 },
-  //   ],
-  // };
-  const initialData = {
-    nodes: [] as any,
-    links: [] as any,
-  };
   const NODE = "Node";
   const EDGE = "Edge";
   const [visibleSidebar, setVisibleSidebar] = useState(false);
   const [clickedItem, setClickedItem] = useState(null as any);
-  const [mapData, setMapData] = useState(initialData);
   const [selectedItem, setSelectedItem] = useState(NODE);
   const [nodeName, setNodeName] = useState("");
   const [fromNode, setFromNode] = useState("");
   const [toNode, setToNode] = useState("");
   const [edgeLabel, setEdgeLabel] = useState("");
   const [state, dispatch] = useContext(AppContext);
-  
-  let { id } = useParams() as any;
-  const auth = useAuth();
+  const { mapData } = state as IAppContext;
 
-  const citySelectItems = [
-    { label: "New York", value: "New York" },
-    { label: "Rome", value: "RM" },
-    { label: "London", value: "London" },
-    { label: "Istanbul", value: "IST" },
-    { label: "Paris", value: "PRS" },
-  ];
+  let { id } = useParams() as any;
 
   const config = {
     nodeHighlightBehavior: true,
@@ -61,17 +41,6 @@ const ConceptMap = () => {
     // staticGraphWithDragAndDrop: true,
     directed: true,
   };
-
-  useEffect(() => {
-    // console.clear();
-    if (auth.user && auth.user.uid) {
-      getUsers(auth.user.uid).then((result) => {
-        const { data } = result[0];
-        console.log(data);
-        setMapData({ nodes: data.nodes, links: data.links });
-      });
-    }
-  }, [auth.user]);
 
   const showLoader = (show: boolean) => {
     dispatch({
@@ -166,7 +135,6 @@ const ConceptMap = () => {
                       ...mapData,
                       nodes,
                     };
-                    console.log(dataUpdate);
                     // updateUserField(id, newData);
                   }
                 } else if (selectedItem === EDGE) {
@@ -192,8 +160,11 @@ const ConceptMap = () => {
                 }
                 if (dataUpdate) {
                   showLoader(true);
-                  console.log(dataUpdate);
                   updateUserField(id, dataUpdate).then(() => {
+                    dispatch({
+                      type: Constants.SET_MAP_DATA,
+                      payload: dataUpdate,
+                    });
                     showLoader(false);
                   });
                 }
@@ -233,39 +204,42 @@ const ConceptMap = () => {
       >
         {sidebarData()}
       </Sidebar>
-      <Graph
-        id="graph-id"
-        data={mapData}
-        config={config}
-        onClickNode={(nodeId: any) => {
-          setVisibleSidebar(true);
-          setClickedItem({
-            isNode: true,
-            data: {
-              nodeId,
-            },
-          });
-          const node = [{ id: 4 }];
-          const link = [{ source: 3, target: 4 }];
-          setMapData({
-            ...mapData,
-            nodes: [...mapData.nodes, ...node],
-            links: [...mapData.links, ...link],
-          });
-          // data.nodes.push({ id: 4 });
-          // data.links.push({ source: 1, target: 4 });
-        }}
-        onClickLink={(source: any, target: any) => {
-          setClickedItem({
-            isNode: false,
-            data: {
-              source,
-              target,
-            },
-          });
-          setVisibleSidebar(true);
-        }}
-      />
+      {mapData && mapData.nodes && mapData.nodes.length ? (
+        <Graph
+          id="graph-id"
+          data={mapData}
+          config={config}
+          onClickNode={(nodeId: any) => {
+            setVisibleSidebar(true);
+            setClickedItem({
+              isNode: true,
+              data: {
+                nodeId,
+              },
+            });
+            dispatch({
+              type: Constants.SET_MAP_DATA,
+              payload: {
+                ...mapData,
+                nodes: [...mapData.nodes],
+                links: [...mapData.links],
+              },
+            });
+          }}
+          onClickLink={(source: any, target: any) => {
+            setClickedItem({
+              isNode: false,
+              data: {
+                source,
+                target,
+              },
+            });
+            setVisibleSidebar(true);
+          }}
+        />
+      ) : (
+        <div>No graph data</div>
+      )}
     </div>
   );
 };

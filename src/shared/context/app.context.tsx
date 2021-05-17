@@ -6,6 +6,7 @@ export interface IAppContext {
   loaderText: string;
   showLoader: boolean;
   isTeacher: boolean;
+  mapData: any;
 }
 
 const defaultVal: any = null;
@@ -16,6 +17,10 @@ const initialState: IAppContext = {
   loaderText: loadingText,
   showLoader: false,
   isTeacher: false,
+  mapData: {
+    nodes: [] as any,
+    links: [] as any,
+  },
 };
 
 const reducer = (state: IAppContext, action: any): IAppContext => {
@@ -30,6 +35,12 @@ const reducer = (state: IAppContext, action: any): IAppContext => {
       return {
         ...state,
         isTeacher: action.payload,
+      };
+
+    case Constants.SET_MAP_DATA:
+      return {
+        ...state,
+        mapData: action.payload,
       };
 
     default:
