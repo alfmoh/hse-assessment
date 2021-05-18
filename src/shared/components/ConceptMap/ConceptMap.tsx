@@ -11,7 +11,7 @@ import { useParams } from "react-router-dom";
 import { Constants } from "shared/constants";
 import { AppContext, IAppContext } from "shared/context/app.context";
 import { useAuth } from "../Firebase/auth";
-
+import { FullScreen, useFullScreenHandle } from "react-full-screen";
 const ConceptMap = () => {
   const NODE = "Node";
   const EDGE = "Edge";
@@ -23,6 +23,7 @@ const ConceptMap = () => {
   const [toNode, setToNode] = useState("");
   const [edgeLabel, setEdgeLabel] = useState("");
   const [state, dispatch] = useContext(AppContext);
+  const handle = useFullScreenHandle();
   const { mapData } = state as IAppContext;
 
   let { id } = useParams() as any;
@@ -38,9 +39,20 @@ const ConceptMap = () => {
       highlightColor: "lightblue",
       renderLabel: true,
     },
+    height: 800,
+    width: 1200,
     // staticGraphWithDragAndDrop: true,
     directed: true,
   };
+
+  useEffect(() => {
+    if (!mapData.nodes) {
+      dispatch({
+        type: Constants.SET_MAP_DATA,
+        payload: { nodes: [], links: [] },
+      });
+    }
+  }, [dispatch, mapData.nodes]);
 
   const showLoader = (show: boolean) => {
     dispatch({
@@ -124,12 +136,17 @@ const ConceptMap = () => {
               label={`Save ${selectedItem}`}
               className="p-button-success cm__save-btn"
               onClick={() => {
+                console.log(mapData);
                 let dataUpdate = null as any;
                 if (selectedItem === NODE) {
                   if (nodeName && nodeName.trim()) {
                     const nodes = [
                       ...mapData.nodes,
-                      { id: nodeName, x: getRandomInt() },
+                      {
+                        id: nodeName,
+                        x: getRandomInt(),
+                        y: getRandomInt(50, 10),
+                      },
                     ];
                     dataUpdate = {
                       ...mapData,
@@ -187,6 +204,11 @@ const ConceptMap = () => {
   return (
     <div className="cm">
       <Button
+        onClick={handle.enter}
+        className="cm__new-btn"
+        label="Fullscreen"
+      />
+      <Button
         onClick={() => {
           setVisibleSidebar(true);
           setClickedItem({ isNew: true, data: {} });
@@ -204,39 +226,42 @@ const ConceptMap = () => {
       >
         {sidebarData()}
       </Sidebar>
+
       {mapData && mapData.nodes && mapData.nodes.length ? (
-        <Graph
-          id="graph-id"
-          data={mapData}
-          config={config}
-          onClickNode={(nodeId: any) => {
-            setVisibleSidebar(true);
-            setClickedItem({
-              isNode: true,
-              data: {
-                nodeId,
-              },
-            });
-            dispatch({
-              type: Constants.SET_MAP_DATA,
-              payload: {
-                ...mapData,
-                nodes: [...mapData.nodes],
-                links: [...mapData.links],
-              },
-            });
-          }}
-          onClickLink={(source: any, target: any) => {
-            setClickedItem({
-              isNode: false,
-              data: {
-                source,
-                target,
-              },
-            });
-            setVisibleSidebar(true);
-          }}
-        />
+        <FullScreen handle={handle}>
+          <Graph
+            id="graph-id"
+            data={mapData}
+            config={config}
+            onClickNode={(nodeId: any) => {
+              setVisibleSidebar(true);
+              setClickedItem({
+                isNode: true,
+                data: {
+                  nodeId,
+                },
+              });
+              dispatch({
+                type: Constants.SET_MAP_DATA,
+                payload: {
+                  ...mapData,
+                  nodes: [...mapData.nodes],
+                  links: [...mapData.links],
+                },
+              });
+            }}
+            onClickLink={(source: any, target: any) => {
+              setClickedItem({
+                isNode: false,
+                data: {
+                  source,
+                  target,
+                },
+              });
+              setVisibleSidebar(true);
+            }}
+          />{" "}
+        </FullScreen>
       ) : (
         <div>No graph data</div>
       )}
@@ -244,8 +269,8 @@ const ConceptMap = () => {
   );
 };
 
-function getRandomInt() {
-  return Math.random() * (100 - 30) + 30;
+function getRandomInt(max = 100, min = 30) {
+  return Math.random() * (max - min) + min;
 }
 
 export default ConceptMap;

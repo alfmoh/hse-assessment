@@ -1,6 +1,7 @@
 .cm {
     &__new-btn {
         float: right;
+        margin-right: 10px;
     }
 
     &__save-btn {
@@ -21,4 +22,9 @@
             align-self: center;
         }
     }
+}
+
+.fullscreen-enabled {
+    background: #fff;
+    height: 100%;
 }

@@ -39,8 +39,8 @@ const Auth = () => {
   };
 
   const routeCallback = () => {
-    if(auth.user) {
-      if (isTeacher) {
+    if (auth.user) {
+      if (auth.user.isTeacher) {
         history.push(`teacher/${auth.user.uid}`);
       } else {
         history.push(`student/${auth.user.uid}`);

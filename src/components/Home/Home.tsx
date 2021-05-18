@@ -3,7 +3,7 @@ import Student from "components/Dashboard/Student/Student";
 import Teacher from "components/Dashboard/Teacher/Teacher";
 import React from "react";
 import { Menubar } from "primereact/menubar";
-import { BrowserRouter, Switch, Route } from "react-router-dom";
+import { BrowserRouter, Switch, Route, Redirect } from "react-router-dom";
 import "./Home.scss";
 import { Button } from "primereact/button";
 import { useAuth } from "shared/components/Firebase/auth";
@@ -31,6 +31,9 @@ const Home = () => {
           <Route path="/auth" component={Auth} />
           <Route path="/teacher/:id" component={Teacher} />
           <Route path="/student/:id" component={Student} />
+          <Route exact path="/">
+            <Redirect to="/auth" />
+          </Route>
         </Switch>
       </BrowserRouter>
     </div>

@@ -6,7 +6,10 @@ export interface IAppContext {
   loaderText: string;
   showLoader: boolean;
   isTeacher: boolean;
-  mapData: any;
+  mapData: {
+    nodes: any[];
+    links: any[];
+  };
 }
 
 const defaultVal: any = null;

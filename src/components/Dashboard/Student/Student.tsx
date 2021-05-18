@@ -1,4 +1,5 @@
 import { Card } from "primereact/card";
+import { Divider } from "primereact/divider";
 import { TabView, TabPanel } from "primereact/tabview";
 import React, { useContext, useEffect, useState } from "react";
 import ConceptMap from "shared/components/ConceptMap/ConceptMap";
@@ -10,7 +11,7 @@ import Assignments from "../Teacher/components/Assignments/Assignments";
 import "./Student.scss";
 
 const Student = () => {
-  const [activeTab, setActiveTab] = useState(1);
+  const [activeTab, setActiveTab] = useState(0);
   const [teacherAssignment, setTeacherAssignment] = useState("");
   const auth = useAuth();
   const [state, dispatch] = useContext(AppContext);
@@ -45,13 +46,16 @@ const Student = () => {
         >
           <TabPanel leftIcon="pi pi-fw pi-home" header="Assignments">
             <p dangerouslySetInnerHTML={{ __html: teacherAssignment }}></p>
+            <Divider />
+            <ConceptMap />
           </TabPanel>
           <TabPanel leftIcon="pi pi-fw pi-calendar" header="Maps">
             {/* <Assignments /> */}
-            <details>
+            {/* <details>
               <summary className="ca-map__title">Create Map</summary>
               <ConceptMap />
-            </details>
+            </details> */}
+            {/* <ConceptMap /> */}
           </TabPanel>
           {/* <TabPanel leftIcon="pi pi-fw pi-sitemap" header="Maps">
         <Maps />
