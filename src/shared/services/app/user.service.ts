@@ -37,6 +37,10 @@ const getAssignments = () => {
   return getAllDocs(ASSIGNMENTS);
 };
 
+const getAllUsers = () => {
+  return getAllDocs(USER_DOC_PATH);
+}
+
 export {
   updateDbUser,
   createDbUser,
@@ -44,4 +48,5 @@ export {
   updateUserField,
   createAssignment,
   getAssignments,
+  getAllUsers
 };
