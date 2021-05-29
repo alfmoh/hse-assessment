@@ -1,0 +1,166 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/IAssignment",
+    "definitions": {
+        "IAssignment": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "content": {
+                    "type": "string"
+                },
+                "creator": {
+                    "$ref": "#/definitions/ITeacher"
+                }
+            },
+            "required": [
+                "id",
+                "title",
+                "content",
+                "creator"
+            ],
+            "additionalProperties": false
+        },
+        "ITeacher": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "role": {
+                    "$ref": "#/definitions/Role"
+                },
+                "students": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/IStudent"
+                    }
+                },
+                "maps": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/IMap"
+                    }
+                }
+            },
+            "required": [
+                "email",
+                "id",
+                "maps",
+                "name",
+                "password",
+                "role",
+                "students"
+            ],
+            "additionalProperties": false
+        },
+        "Role": {
+            "type": "number",
+            "enum": [
+                0,
+                1
+            ]
+        },
+        "IStudent": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "role": {
+                    "$ref": "#/definitions/Role"
+                },
+                "assignments": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/IAssignment"
+                    }
+                },
+                "courses": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ICourse"
+                    }
+                },
+                "maps": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/IMap"
+                    }
+                }
+            },
+            "required": [
+                "assignments",
+                "courses",
+                "email",
+                "id",
+                "maps",
+                "name",
+                "password",
+                "role"
+            ],
+            "additionalProperties": false
+        },
+        "ICourse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "id",
+                "title",
+                "description"
+            ],
+            "additionalProperties": false
+        },
+        "IMap": {
+            "type": "object",
+            "properties": {
+                "nodes": {
+                    "type": "array",
+                    "items": {}
+                },
+                "links": {
+                    "type": "array",
+                    "items": {}
+                }
+            },
+            "required": [
+                "nodes",
+                "links"
+            ],
+            "additionalProperties": false
+        }
+    }
+}
